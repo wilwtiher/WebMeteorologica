@@ -6,7 +6,15 @@
 #include "ssd1306.h"
 #include "font.h"
 #include <math.h>
+#include "pico/cyw43_arch.h"
+#include "lwip/tcp.h"
+#include "hardware/adc.h"
+#include "hardware/gpio.h"
+#include "hardware/pwm.h"
+#include <string.h>
+#include <stdlib.h>
 
+#include "pico/bootrom.h"
 #define I2C_PORT i2c0               // i2c0 pinos 0 e 1, i2c1 pinos 2 e 3
 #define I2C_SDA 0                   // 0 ou 2
 #define I2C_SCL 1                   // 1 ou 3
