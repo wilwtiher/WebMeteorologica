@@ -17,10 +17,12 @@
 #include "pico/bootrom.h"
 
 // Definições de pinos para botões e LEDs
+#define buzzer 10 // Pino do buzzer A
 #define BOTAO_B 6
-#define LED_AMARELO 4
-#define LED_VERDE 9
-#define LED_VERMELHO 8
+// LEDS
+#define led_RED 13   // Red=13, Blue=12, Green=11
+#define led_BLUE 12  // Red=13, Blue=12, Green=11
+#define led_GREEN 11 // Red=13, Blue=12, Green=11
 #define BOTAO_A 5
 #define BOTAO_JOY 22
 #define POT_PIN 28
@@ -43,7 +45,7 @@
 
 int t_max = 30;
 int u_max = 80;
-int p_max = 100;
+int p_max = 1000;
 int t_min = 15;
 int u_min = 30;
 int p_min = 70;
@@ -246,6 +248,27 @@ int main()
 
     stdio_init_all();
 
+    // Configuração dos LEDs como saída
+    gpio_init(led_BLUE);
+    gpio_set_dir(led_BLUE, GPIO_OUT);
+    gpio_put(led_BLUE, false);
+
+    gpio_init(led_GREEN);
+    gpio_set_dir(led_GREEN, GPIO_OUT);
+    gpio_put(led_GREEN, false);
+
+    gpio_init(led_RED);
+    gpio_set_dir(led_RED, GPIO_OUT);
+    gpio_put(led_RED, false);
+
+    // iniciacao buzzer
+    gpio_set_function(buzzer, GPIO_FUNC_PWM);
+    uint slice_num = pwm_gpio_to_slice_num(buzzer);
+    pwm_set_wrap(slice_num, 4096);
+    // Define o clock divider como 440 (nota lá para o buzzer)
+    pwm_set_clkdiv(slice_num, 440.0f);
+    pwm_set_enabled(slice_num, true);
+
     // I2C do Display funcionando em 400Khz.
     i2c_init(I2C_PORT_DISP, 400 * 1000);
 
@@ -347,10 +370,18 @@ int main()
         {
             printf("Erro na leitura do AHT10!\n\n\n");
         }
-        if(t_max>temp>t_min && u_max>hum>u_min && p_max>pres>p_min){
+        if(t_max>temp / 100.0 && temp / 100.0>t_min && u_max>hum && hum>u_min && p_max>pres/ 1000.0 && pres/ 1000.0>p_min){// 
             certo = true;
+            pwm_set_gpio_level(buzzer, 0);
+            gpio_put(led_BLUE, false);
+            gpio_put(led_RED, false);
+            gpio_put(led_GREEN, true);
         }else{
             certo = false;
+            pwm_set_gpio_level(buzzer, 2048);
+            gpio_put(led_BLUE, false);
+            gpio_put(led_RED, true);
+            gpio_put(led_GREEN, false);
         }
 
         sprintf(str_tmp1, "%.1fC", temp / 100.0);     // Converte o inteiro em string
