@@ -47,6 +47,7 @@ int p_max = 100;
 int t_min = 15;
 int u_min = 30;
 int p_min = 70;
+bool certo = true;
 
 int32_t temp;
 float pres;
@@ -345,6 +346,11 @@ int main()
         else
         {
             printf("Erro na leitura do AHT10!\n\n\n");
+        }
+        if(t_max>temp>t_min && u_max>hum>u_min && p_max>pres>p_min){
+            certo = true;
+        }else{
+            certo = false;
         }
 
         sprintf(str_tmp1, "%.1fC", temp / 100.0);     // Converte o inteiro em string
